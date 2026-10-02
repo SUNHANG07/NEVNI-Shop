@@ -1,0 +1,104 @@
+<!doctype html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NEVNI</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:#f7f8fb;color:#172033}header{background:white;border-bottom:1px solid #e8ebf1;position:sticky;top:0;z-index:5}.nav{max-width:1100px;margin:auto;height:68px;padding:0 20px;display:flex;justify-content:space-between;align-items:center}.logo{font-size:24px;font-weight:800;letter-spacing:2px}a{color:#172033;text-decoration:none;margin-left:18px}.hero{background:#eef3f8;padding:55px 20px}.hero-in,.wrap{max-width:1100px;margin:auto}.hero h1{font-size:42px;margin:0 0 10px}.hero p{font-size:18px;color:#667085}.wrap{padding:30px 20px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px}.card{background:white;border:1px solid #e5e8ee;border-radius:16px;overflow:hidden}.thumb{width:100%;height:230px;object-fit:cover;background:#eef1f5}.body{padding:17px}.name{font-weight:700;font-size:18px}.price{font-weight:800;font-size:20px;margin-top:8px}.stock{color:#687386;font-size:13px;margin-top:6px}button{border:0;border-radius:9px;padding:11px 15px;font-weight:700;cursor:pointer}.primary{background:#172033;color:white}.wide{width:100%;margin-top:14px}.detail{display:grid;grid-template-columns:1fr 1fr;gap:30px}.detail img{width:100%;max-height:540px;object-fit:cover;border-radius:16px}.desc{white-space:pre-wrap;color:#596477;line-height:1.7}.cart{position:fixed;right:20px;bottom:20px;background:#172033;color:white;border-radius:30px;padding:14px 20px;z-index:10}.cart span{background:white;color:#172033;border-radius:20px;padding:2px 7px}.modal{display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center;padding:20px;z-index:20}.box{background:white;border-radius:16px;padding:22px;width:100%;max-width:520px}.row{display:flex;gap:12px;align-items:center;border-bottom:1px solid #eee;padding:12px 0}.row img{width:60px;height:60px;object-fit:cover;border-radius:8px}.grow{flex:1}@media(max-width:700px){.detail{grid-template-columns:1fr}.hero h1{font-size:31px}}</style><script src="https://js.tosspayments.com/v2/standard"></script></head><body>
+<header><div class="nav"><div class="logo">NEVNI</div><nav><a href="/">홈</a></nav></div></header><section class="hero"><div class="hero-in"><h1>더 좋은 잠을 위한<br>NEVNI</h1><p>편안한 밤을 위한 수면용품</p></div></section><main class="wrap"><h2>NEVNI PRODUCTS</h2><div id="products" class="grid"></div><div id="detail" style="display:none"></div></main><button class="cart" onclick="openCart()">장바구니 <span id="cnt">0</span></button>
+<div id="modal" class="modal" onclick="if(event.target===this)closeCart()"><div class="box">
+<h2>장바구니 주문서</h2>
+<div id="cartStep">
+  <div id="items"></div><h3 id="total"></h3>
+  <button class="primary wide" onclick="showCustomerForm()">결제하기</button>
+  <button onclick="closeCart()" style="margin-top:8px">닫기</button>
+</div>
+<div id="customerStep" style="display:none">
+  <h3>주문자 정보</h3>
+  <input id="cname" placeholder="이름" style="width:100%;padding:12px;border:1px solid #dce1e8;border-radius:9px;margin:6px 0">
+  <input id="cphone" placeholder="연락처 (예: 010-1234-5678)" style="width:100%;padding:12px;border:1px solid #dce1e8;border-radius:9px;margin:6px 0">
+  <h3>배송지</h3>
+  <input id="cpostal" placeholder="우편번호" style="width:100%;padding:12px;border:1px solid #dce1e8;border-radius:9px;margin:6px 0">
+  <input id="caddress" placeholder="배송주소" style="width:100%;padding:12px;border:1px solid #dce1e8;border-radius:9px;margin:6px 0">
+  <input id="cdetail" placeholder="상세주소" style="width:100%;padding:12px;border:1px solid #dce1e8;border-radius:9px;margin:6px 0">
+  <div style="background:#f7f8fa;padding:12px;border-radius:9px;margin-top:12px"><b>결제금액</b><span id="checkoutTotal" style="float:right"></span></div>
+  <button id="payBtn" class="primary wide" onclick="startPayment()">최종 결제하기</button>
+  <button onclick="backToCart()" style="margin-top:8px">주문서로 돌아가기</button>
+</div></div></div>
+<script>
+let ps=[],cart=JSON.parse(localStorage.getItem("nevni-cart")||"[]");const $=x=>document.getElementById(x),money=n=>Number(n).toLocaleString("ko-KR")+"원";function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}function pic(p){return p.image||"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="500"><rect width="100%" height="100%" fill="#eef1f5"/><text x="50%" y="50%" text-anchor="middle" font-size="44" fill="#7b8492">NEVNI</text></svg>')}async function load(){ps=await(await fetch("/api/products")).json();render()}function render(){$("products").innerHTML=ps.map(p=>`<div class="card"><img class="thumb" src="${pic(p)}" onclick="detail('${p.id}')"><div class="body"><div class="name">${esc(p.name)}</div><div class="price">${money(p.price)}</div><div class="stock">재고 ${p.stock}개</div><button class="primary wide" onclick="add('${p.id}')">장바구니 담기</button></div></div>`).join("")||"<p>등록된 상품이 없습니다.</p>"}function detail(id){let p=ps.find(x=>x.id===id);$("products").style.display="none";$("detail").style.display="grid";$("detail").className="detail";$("detail").innerHTML=`<img src="${pic(p)}"><div><h1>${esc(p.name)}</h1><h2>${money(p.price)}</h2><p class="desc">${esc(p.description||"NEVNI 수면용품")}</p><p>재고 ${p.stock}개</p><button class="primary" onclick="add('${p.id}')">장바구니 담기</button> <button onclick="back()">목록</button></div>`}function back(){$("detail").style.display="none";$("products").style.display="grid"}function save(){localStorage.setItem("nevni-cart",JSON.stringify(cart));$("cnt").textContent=cart.reduce((a,x)=>a+x.qty,0)}function add(id){let x=cart.find(x=>x.id===id);x?x.qty++:cart.push({id,qty:1});save();alert("장바구니에 담았습니다.")}function openCart(){renderCart();$("cartStep").style.display="block";$("customerStep").style.display="none";$("modal").style.display="flex"}
+function closeCart(){$("modal").style.display="none"}
+function renderCart(){
+  cart=cart.filter(x=>{let p=ps.find(p=>p.id===x.id);return p&&p.stock>0});
+  $("items").innerHTML=cart.map(x=>{let p=ps.find(p=>p.id===x.id);if(!p)return"";if(x.qty>p.stock)x.qty=p.stock;return`<div class="row"><img src="${pic(p)}"><div class="grow"><b>${esc(p.name)}</b><br>${money(p.price)}<br><small>재고 ${p.stock}개</small></div><button onclick="chg('${p.id}',-1)">−</button>${x.qty}<button onclick="chg('${p.id}',1)">+</button></div>`}).join("")||"<p>장바구니가 비어 있습니다.</p>";
+  const total=cart.reduce((a,x)=>{let p=ps.find(p=>p.id===x.id);return a+(p?p.price*x.qty:0)},0);
+  $("total").textContent="합계 "+money(total);$("cnt").textContent=cart.reduce((a,x)=>a+x.qty,0);save();
+}
+function showCustomerForm(){
+  if(!cart.length)return alert("장바구니가 비어 있습니다.");
+  for(const x of cart){const p=ps.find(p=>p.id===x.id);if(!p||p.stock<=0)return alert("품절된 상품이 포함되어 있습니다.");if(x.qty>p.stock)return alert(p.name+"의 재고가 부족합니다.");}
+  const total=cart.reduce((a,x)=>a+ps.find(p=>p.id===x.id).price*x.qty,0);
+  $("checkoutTotal").textContent=money(total);$("cartStep").style.display="none";$("customerStep").style.display="block";
+}
+function backToCart(){$("customerStep").style.display="none";$("cartStep").style.display="block"}
+function chg(id,n){
+  let x=cart.find(x=>x.id===id),p=ps.find(p=>p.id===id);if(!x||!p)return;
+  if(n>0&&x.qty>=p.stock)return alert(p.stock>0?"재고 수량을 초과할 수 없습니다.":"품절된 상품입니다.");
+  x.qty+=n;if(x.qty<=0)cart=cart.filter(x=>x.id!==id);renderCart();
+}
+async function startPayment(){
+  if(!cart.length)return alert("장바구니가 비어 있습니다.");
+  const customer={
+    name:$("cname").value.trim(),
+    phone:$("cphone").value.trim(),
+    postal:$("cpostal").value.trim(),
+    address:$("caddress").value.trim(),
+    detail:$("cdetail").value.trim()
+  };
+  if(!customer.name||!customer.phone||!customer.address)
+    return alert("이름, 연락처, 배송주소를 모두 입력해주세요.");
+
+  for(const x of cart){
+    const p=ps.find(p=>p.id===x.id);
+    if(!p||p.stock<=0)return alert("품절된 상품이 포함되어 있습니다.");
+    if(x.qty>p.stock)return alert(p.name+"의 재고가 부족합니다.");
+  }
+
+  const r=await fetch("/api/orders",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({items:cart,customer})
+  });
+  const d=await r.json();
+  if(!r.ok)return alert(d.error||"주문 생성에 실패했습니다.");
+
+  const cfg=await (await fetch("/api/payment/config")).json();
+  if(!cfg.clientKey)
+    return alert("토스페이먼츠 Client Key가 설정되지 않았습니다. .env를 확인해주세요.");
+
+  try{
+    // NEVNI uses Toss Payments V2 "payment window" integration.
+    // V2 payment-window uses the order/payment-window client key (gck/gsk)
+    // and tossPayments.widgets(), not the legacy payment() API.
+    const tossPayments=TossPayments(cfg.clientKey);
+    const widgets=tossPayments.widgets({customerKey:"ANONYMOUS"});
+    await widgets.setAmount({currency:"KRW",value:d.total});
+
+    const paymentWindow=await widgets.renderPaymentWindow();
+
+    paymentWindow.on("paymentRequest",async(paymentMethod)=>{
+      await widgets.requestPayment({
+        orderId:d.orderId,
+        orderName:d.orderName,
+        successUrl:location.origin+"/payment-success.html",
+        failUrl:location.origin+"/payment-fail.html",
+        customerEmail:"",
+        customerName:customer.name
+      });
+    });
+
+    paymentWindow.on("cancel",()=>{
+      // The order remains in 결제대기 until payment confirmation succeeds.
+    });
+  }catch(e){
+    console.error(e);
+    alert(e?.message||"토스페이먼츠 결제창을 열 수 없습니다.");
+  }
+}
+save();load();
+</script></body></html>
