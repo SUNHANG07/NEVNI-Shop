@@ -1,0 +1,69 @@
+{
+  "products": [
+    {
+      "id": "p-1790878655303-afc6",
+      "name": "허선행",
+      "price": 3000,
+      "stock": 3,
+      "image": "",
+      "description": "ㅂㅈㄷ",
+      "active": true,
+      "createdAt": "2026-10-01T18:17:35.303Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "o-1790878700600-d62090",
+      "createdAt": "2026-10-01T18:18:20.600Z",
+      "status": "결제완료",
+      "paymentStatus": "PAID",
+      "paymentKey": "tgen_20261002031836APvh3",
+      "items": [
+        {
+          "id": "p-1790878655303-afc6",
+          "name": "허선행",
+          "price": 3000,
+          "qty": 1
+        }
+      ],
+      "total": 3000,
+      "customer": {
+        "name": "허선행",
+        "phone": "01090351507",
+        "postal": "11751",
+        "address": "부용로49",
+        "detail": "108동1304호"
+      },
+      "paidAt": "2026-10-01T18:19:00.880Z",
+      "paymentMethod": "간편결제",
+      "updatedAt": "2026-10-01T18:20:54.143Z",
+      "carrier": "cj대한통운",
+      "trackingNumber": "321654963"
+    },
+    {
+      "id": "o-1790930185048-b00236",
+      "createdAt": "2026-10-02T08:36:25.048Z",
+      "status": "결제완료",
+      "paymentStatus": "PAID",
+      "paymentKey": "tgen_20261002173643yfa88",
+      "items": [
+        {
+          "id": "p-1790878655303-afc6",
+          "name": "허선행",
+          "price": 3000,
+          "qty": 1
+        }
+      ],
+      "total": 3000,
+      "customer": {
+        "name": "김광유",
+        "phone": "01024508224",
+        "postal": "11751",
+        "address": "부용로49",
+        "detail": "108동1702호"
+      },
+      "paidAt": "2026-10-02T08:37:05.032Z",
+      "paymentMethod": "간편결제"
+    }
+  ]
+}
